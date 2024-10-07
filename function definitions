@@ -1,0 +1,94 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class EmployeeManagement {
+    static Map<String, List<Map<String, String>>> collections = new HashMap<>();
+    public static void createCollection(String p_collection_name) {
+        collections.put(p_collection_name, new ArrayList<>());
+    }
+    public static void indexData(String p_collection_name, String p_exclude_column) {
+        List<Map<String, String>> collection = collections.get(p_collection_name);
+        if (collection != null) {
+            for (Map<String, String> employee : collection) {
+                employee.remove(p_exclude_column);
+            }
+        }
+    }
+
+    public static List<Map<String, String>> searchByColumn(String p_collection_name, String p_column_name, String p_column_value) {
+        List<Map<String, String>> collection = collections.get(p_collection_name);
+        List<Map<String, String>> result = new ArrayList<>();
+        if (collection != null) {
+            for (Map<String, String> employee : collection) {
+                if (p_column_value.equals(employee.get(p_column_name))) {
+                    result.add(employee);
+                }
+            }
+        }
+        return result;
+    }
+    public static int getEmpCount(String p_collection_name) {
+        List<Map<String, String>> collection = collections.get(p_collection_name);
+        return collection == null ? 0 : collection.size();
+    }
+
+    public static void delEmpById(String p_collection_name, String p_employee_id) {
+        List<Map<String, String>> collection = collections.get(p_collection_name);
+        if (collection != null) {
+            collection.removeIf(employee -> p_employee_id.equals(employee.get("id")));
+        }
+    }
+    public static Map<String, Integer> getDepFacet(String p_collection_name) {
+        List<Map<String, String>> collection = collections.get(p_collection_name);
+        Map<String, Integer> depCount = new HashMap<>();
+        if (collection != null) {
+            for (Map<String, String> employee : collection) {
+                String department = employee.get("Department");
+                if (department != null) {
+                    depCount.put(department, depCount.getOrDefault(department, 0) + 1);
+                }
+            }
+        }
+        return depCount;
+    }
+    public static void main(String[] args) {
+        String v_nameCollection = "Hash_JohnDoe";  
+        String v_phoneCollection = "Hash_1234";    
+
+        createCollection(v_nameCollection);
+        createCollection(v_phoneCollection);
+
+        Map<String, String> emp1 = new HashMap<>();
+        emp1.put("id", "E02003");
+        emp1.put("Name", "John");
+        emp1.put("Department", "IT");
+        emp1.put("Gender", "Male");
+        collections.get(v_nameCollection).add(emp1);
+
+        Map<String, String> emp2 = new HashMap<>();
+        emp2.put("id", "E02004");
+        emp2.put("Name", "Jane");
+        emp2.put("Department", "HR");
+        emp2.put("Gender", "Female");
+        collections.get(v_nameCollection).add(emp2);
+
+        Map<String, String> emp3 = new HashMap<>();
+        emp3.put("id", "E03001");
+        emp3.put("Name", "Alice");
+        emp3.put("Department", "IT");
+        emp3.put("Gender", "Female");
+        collections.get(v_phoneCollection).add(emp3);
+        System.out.println("Employee count (Name Collection): " + getEmpCount(v_nameCollection));
+        indexData(v_nameCollection, "Department");
+        indexData(v_phoneCollection, "Gender");
+        delEmpById(v_nameCollection, "E02003");
+        System.out.println("Employee count (Name Collection after deletion): " + getEmpCount(v_nameCollection));
+        System.out.println("Search by Department 'IT' (Name Collection): " + searchByColumn(v_nameCollection, "Department", "IT"));
+        System.out.println("Search by Gender 'Male' (Name Collection): " + searchByColumn(v_nameCollection, "Gender", "Male"));
+        System.out.println("Search by Department 'IT' (Phone Collection): " + searchByColumn(v_phoneCollection, "Department", "IT"));
+        System.out.println("Department Facet (Name Collection): " + getDepFacet(v_nameCollection));
+        System.out.println("Department Facet (Phone Collection): " + getDepFacet(v_phoneCollection));
+    }
+}
